@@ -4,8 +4,8 @@ async function doWebScraping() {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.setDefaultNavigationTimeout(0);
-  await page.setViewport({ width: 1280, height: 800 });
-  await page.goto("https://www.amazon.com.mx/events/holidaydeals?_encoding=UTF8&ref_=nav_cs_gb", {
+  await page.setViewport({ width: 19, height: 800 });
+  await page.goto("https://www.amazon.com.mx/gp/goldbox?ref_=nav_cs_gb", {
     waitUntil: "networkidle2",
   });
 
@@ -38,14 +38,13 @@ async function doWebScraping() {
         link,
       };
       articles.push(article);
-      break
+      //break
     } catch (err) {
       console.log("error: ", err);
     }
   }
 
   await browser.close();
-
   return articles;
 }
 
