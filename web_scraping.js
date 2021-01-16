@@ -1,4 +1,7 @@
 const puppeteer = require("puppeteer");
+var fs = require('fs');
+//Date format
+const dateFormat = require("dateformat");
 
 async function doWebScraping() {
   const browser = await puppeteer.launch();
@@ -11,31 +14,31 @@ async function doWebScraping() {
 
   let divs = [];
   divs = await page.$$('div[id="widgetContent"] > div');
-  console.log("divs lenght = " + divs.length);
+  //console.log("divs lenght = " + divs.length);
 
   const articles = [];
   for (const div of divs) {
     try {
-      const title = await div.$eval(
+      const name = await div.$eval(
         "a[id='dealTitle'",
         (element) => element.innerText
       );
-      const imageUrl = await div.$eval("img", (element) =>
+      const img_url = await div.$eval("img", (element) =>
         element.getAttribute("src")
       );
       let price = await div.$eval(
         "span[class='gb-font-size-medium inlineBlock unitLineHeight dealPriceText']",
         (element) => element.innerText
       );
-      let link = await div.$eval("a[id='dealTitle'", (element) =>
+      let deal_url = await div.$eval("a[id='dealTitle'", (element) =>
         element.getAttribute("href")
       );
 
       const article = {
-        title,
-        imageUrl,
+        name,
+        img_url,
         price,
-        link,
+        deal_url,
       };
       articles.push(article);
       //break
@@ -49,10 +52,25 @@ async function doWebScraping() {
 }
 
 doWebScraping()
-    .then((articles) => {
-      console.log("articles: ", articles);
-      dataaux = articles[0];
+  .then((articles) => {
+    //console.log("articles: ", articles[0]);
+    dataaux = articles[0];
+    /*Leer archivo Json y agregar nueva oferta*/
+    fs.readFile('deals.json', function (err, content) {
+      if (err) throw err;
+      var parseJson = JSON.parse(content);
+      //console.log(parseJson)
+      //console.log("*****")
+      let date = new Date();
+      let formatDate = dateFormat(date, "dd/mm/yyyy");
+      dataaux.date = formatDate
+      parseJson.push(dataaux)
+      //console.log(parseJson)
+      fs.writeFile('deals.json',JSON.stringify(parseJson,null,2),function(err){
+        if(err) throw err;
+      })
     })
-    .catch((err) => console.log(err));
+  })
+  .catch((err) => console.log(err));
 
 module.exports.doWebScraping = doWebScraping;
